@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"github.com/DeedleFake/census/ps2/events"
 	"log"
 	"os"
+	"os/signal"
 	"time"
 )
 
@@ -21,6 +21,7 @@ var (
 )
 
 func coord() {
+	log.Printf("Loading session from %q...", SessionFile)
 	s, err := LoadSession(SessionFile)
 	if err != nil {
 		log.Printf("Failed to load session from %q: %v", SessionFile, err)
@@ -79,12 +80,13 @@ func monitor() {
 func main() {
 	go monitor()
 	go coord()
+	go server()
 
-	in := bufio.NewScanner(os.Stdin)
-	for in.Scan() {
-		log.Printf("Average time spent online: %v", <-average)
-	}
+	sig := make(chan os.Signal)
+	signal.Notify(sig, os.Interrupt)
+	<-sig
 
+	log.Printf("Saving session to %q...", SessionFile)
 	err := (<-session).Save(SessionFile)
 	if err != nil {
 		log.Printf("Failed to save session to %q: %v", SessionFile, err)
