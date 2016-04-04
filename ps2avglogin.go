@@ -8,15 +8,25 @@ import (
 	"time"
 )
 
+const (
+	SessionFile = "session.data"
+)
+
 var (
 	logins  = make(chan *events.PlayerLogin)
 	logouts = make(chan *events.PlayerLogout)
 
 	average = make(chan time.Duration)
+	session = make(chan *Session)
 )
 
 func coord() {
-	var avg RollingAverage
+	s, err := LoadSession(SessionFile)
+	if err != nil {
+		log.Printf("Failed to load session from %q: %v", SessionFile, err)
+		log.Println("Creating new session...")
+	}
+
 	chars := make(map[int64]time.Time)
 
 	for {
@@ -25,11 +35,12 @@ func coord() {
 			chars[ev.CharacterID] = time.Unix(ev.Timestamp, 0)
 		case ev := <-logouts:
 			if in, ok := chars[ev.CharacterID]; ok {
-				avg.Update(time.Unix(ev.Timestamp, 0).Sub(in))
+				s.Avg.Update(time.Unix(ev.Timestamp, 0).Sub(in))
 				delete(chars, ev.CharacterID)
 			}
 
-		case average <- avg.Get():
+		case average <- s.Avg.Get():
+		case session <- &s:
 		}
 	}
 }
@@ -69,5 +80,10 @@ func main() {
 	in := bufio.NewScanner(os.Stdin)
 	for in.Scan() {
 		log.Printf("Average time spent online: %v", <-average)
+	}
+
+	err := (<-session).Save(SessionFile)
+	if err != nil {
+		log.Printf("Failed to save session to %q: %v", SessionFile, err)
 	}
 }
