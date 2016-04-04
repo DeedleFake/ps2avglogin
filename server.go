@@ -9,12 +9,18 @@ import (
 var serverTmpl = new(template.Template)
 
 func init() {
+	serverTmpl.Funcs(template.FuncMap{
+		"average": func() string {
+			return (<-average).String()
+		},
+	})
+
 	template.Must(serverTmpl.New("main").Parse(`<html>
 	<head>
 		<title>{{.Title}} :: Main</title>
 	</head>
 	<body>
-		<h2>Unimplemented.</h2>
+		<h2>Current average: {{average}}</h2>
 	</body>
 </html>`))
 }
