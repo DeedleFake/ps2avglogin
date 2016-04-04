@@ -5,17 +5,13 @@ import (
 )
 
 type RollingAverage struct {
-	cur time.Duration
-	num time.Duration
+	Cur time.Duration
+	Num time.Duration
 }
 
 func (r *RollingAverage) Update(new time.Duration) time.Duration {
-	r.cur = ((r.cur * r.num) + new) / (r.num + 1)
-	r.num++
+	r.Cur = ((r.Cur * r.Num) + new) / (r.Num + 1)
+	r.Num++
 
-	return r.cur
-}
-
-func (r *RollingAverage) Get() time.Duration {
-	return r.cur
+	return r.Cur
 }

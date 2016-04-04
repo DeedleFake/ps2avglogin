@@ -39,7 +39,7 @@ func coord() {
 				delete(chars, ev.CharacterID)
 			}
 
-		case average <- s.Avg.Get():
+		case average <- s.Avg.Cur:
 		case session <- &s:
 		}
 	}
@@ -52,11 +52,14 @@ func monitor() {
 	}
 	defer cl.Close()
 
-	cl.Subscribe(events.Sub{
+	err = cl.Subscribe(events.Sub{
 		Events: []string{"PlayerLogin", "PlayerLogout"},
 		Chars:  events.SubAll,
 		Worlds: events.SubAll,
 	})
+	if err != nil {
+		log.Fatalf("Failed to subscribe to login/logout events: %v", err)
+	}
 
 	for {
 		ev, err := cl.Next()
