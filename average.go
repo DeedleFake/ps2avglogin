@@ -23,7 +23,7 @@ func (r RollingAverage) MarshalJSON() ([]byte, error) {
 	buf.WriteString(`{"cur": "`)
 	buf.WriteString(r.Cur.String())
 	buf.WriteString(`", "num": `)
-	buf.WriteString(strconv.FormatInt(int64(r.Num), 10))
+	buf.WriteString(strconv.FormatInt(r.Num, 10))
 	buf.WriteByte('}')
 
 	return buf.Bytes(), nil
