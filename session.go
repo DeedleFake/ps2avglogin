@@ -50,8 +50,14 @@ func (s Session) Save(path string) error {
 	return e.Encode(&s)
 }
 
+// timeDiff is a light wrapper around time.Time that marshals to JSON
+// as a duration since the time that the diff represents. For example,
+// if time.Now() is 3 seconds after the time represented by the
+// timeDiff, the JSON representation will be "3s".
 type timeDiff time.Time
 
+// Since returns the duration representing the difference between the
+// current time and t.
 func (t timeDiff) Since() time.Duration {
 	return time.Now().Sub(time.Time(t))
 }

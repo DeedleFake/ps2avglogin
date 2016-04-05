@@ -9,6 +9,7 @@ import (
 	"text/template"
 )
 
+// serverTmpl stores templates for the web interface.
 var serverTmpl = new(template.Template)
 
 func init() {
@@ -68,6 +69,8 @@ func init() {
 </html>`))
 }
 
+// logHandler returns an http.Handler that logs every request that
+// gets sent to h.
 func logHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		log.Printf("Got %q request for %q", req.Method, req.URL)
@@ -76,6 +79,8 @@ func logHandler(h http.Handler) http.Handler {
 	})
 }
 
+// tmplHandler returns a handler that serves the template t in
+// serverTmpl.
 func tmplHandler(t string) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		err := serverTmpl.ExecuteTemplate(rw, t, map[string]interface{}{
@@ -88,6 +93,7 @@ func tmplHandler(t string) http.Handler {
 	})
 }
 
+// serveAverage serves the current session as JSON.
 func serveAverage(rw http.ResponseWriter, req *http.Request) {
 	e := json.NewEncoder(rw)
 	err := e.Encode(<-session)
@@ -96,6 +102,7 @@ func serveAverage(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// serveJS serves the javascript for the web interface.
 func serveJS(rw http.ResponseWriter, req *http.Request) {
 	_, err := io.WriteString(rw, `$(document).ready(function() {
 	var loading = $('#loading');
@@ -134,6 +141,7 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// server runs the web interface.
 func server() {
 	http.Handle("/average", logHandler(http.HandlerFunc(serveAverage)))
 	http.Handle("/ps2avglogin.js", logHandler(http.HandlerFunc(serveJS)))

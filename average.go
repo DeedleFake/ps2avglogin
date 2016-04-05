@@ -25,6 +25,8 @@ func (r *RollingAverage) Update(new time.Duration) time.Duration {
 	return time.Duration(r.Cur)
 }
 
+// jsonDuration is a thin wrapper around time.Duration to make it more
+// JSON friendly.
 type jsonDuration time.Duration
 
 func (d jsonDuration) MarshalJSON() ([]byte, error) {

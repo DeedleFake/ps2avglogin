@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// flags stores the command line flags and arguments.
 var flags struct {
 	addr    string
 	session string
@@ -20,6 +21,8 @@ func init() {
 	flag.Parse()
 }
 
+// durationFlag is a wrapper around time.Duration to make it satisfy
+// flag.Value.
 type durationFlag time.Duration
 
 func (f durationFlag) String() string {

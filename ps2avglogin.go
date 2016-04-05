@@ -9,12 +9,18 @@ import (
 )
 
 var (
+	// logins and logouts are channels for login and logout events,
+	// respectively.
 	logins  = make(chan *events.PlayerLogin)
 	logouts = make(chan *events.PlayerLogout)
 
+	// session can be used to get a copy of the current session.
 	session = make(chan Session)
 )
 
+// coord coordinates the session, updating it properly when login and
+// logout events occur, and sending a copy of the session down the
+// session channel when it's requested.
 func coord() {
 	log.Printf("Loading session from %q...", flags.session)
 	s, err := LoadSession(flags.session)
@@ -47,6 +53,9 @@ func coord() {
 	}
 }
 
+// monitor connects to the census API, subscribes to PlayerLogin and
+// PlayerLogout events, and then sends them down the appropriate
+// channels.
 func monitor() {
 	cl, err := events.NewClient("", "", "example")
 	if err != nil {
