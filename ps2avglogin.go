@@ -27,6 +27,13 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 
 	chars := make(map[int64]time.Time)
 
+	copySession := func() Session {
+		s := s
+		s.NumChars = len(chars)
+
+		return s
+	}
+
 	for {
 		select {
 		case ev := <-logins:
@@ -43,7 +50,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 				delete(chars, ev.CharacterID)
 			}
 
-		case session <- s:
+		case session <- copySession():
 		}
 	}
 }

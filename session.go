@@ -25,6 +25,10 @@ type Session struct {
 	// TODO: Make this a slice that can track the lengths of multiple
 	// uses of the same session.
 	Runtime timeDiff `json:"runtime"`
+
+	// NumChars is the number of online characters that are currently
+	// being tracked.
+	NumChars int `json:"numchars"`
 }
 
 // LoadSession loads a session from the file at path. It returns the

@@ -45,8 +45,8 @@ func init() {
 			<div id='main' style='display:none;'>
 				<div id='noshort'>
 					<h1>Excluding short sessions:</h1>
-					<h2>Current average: <span class='average'></span></h2>
-					<h3>Calculated from <span class='num'></span> logouts.</h3>
+					<h2>Average session: <span class='average'></span></h2>
+					<h3>Calculated from <span class='num'></span> sessions.</h3>
 					A session is short if it lasts less than {{shortlen}}.
 				</div>
 
@@ -54,15 +54,14 @@ func init() {
 
 				<div id='total'>
 					<h1>Including short sessions:</h1>
-					<h2>Current average: <span class='average'></span></h2>
-					<h3>Calculated from <span class='num'></span> logouts.</h3>
+					<h2>Average session: <span class='average'></span></h2>
+					<h3>Calculated from <span class='num'></span> sessions.</h3>
 				</div>
 
 				<hr />
 
-				<div>
-					Tracker runtime: <span id='runtime'></span>.
-				</div>
+				Currently tracking <span id='online'></span> active sessions.<br />
+				Tracker runtime: <span id='runtime'></span>
 			</div>
 		</div>
 	</body>
@@ -117,6 +116,7 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		"num": $('#total .num'),
 	};
 
+	var online = $('#online');
 	var runtime = $('#runtime');
 
 	function getSession() {
@@ -129,6 +129,7 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 			total.average.html(data.total.cur);
 			total.num.html(data.total.num);
 
+			online.html(data.numchars);
 			runtime.html(data.runtime);
 		});
 	};
