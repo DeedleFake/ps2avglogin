@@ -24,24 +24,39 @@ func init() {
 
 		<script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js' defer></script>
 		<script type='application/javascript' src='/ps2avglogin.js' defer></script>
+
+		<style type='text/css'>
+			hr
+			{
+				width:80%;
+			}
+		</style>
 	</head>
 	<body style='background-color:#EEEEEE;'>
-		<div id='loading'>
-			<h2>Loading...</h2>
-		</div>
-		<div id='main' style='display:none;'>
-			<div id='noshort'>
-				<h1>Excluding short sessions:</h1>
-				<h2>Current average: <span class='average'></span></h2>
-				<h3>Calculated from <span class='num'></span> logouts.</h3>
+	<div style='max-width:640px;margin-left:auto;margin-right:auto;'>
+			<div id='loading'>
+				<h2>Loading...</h2>
 			</div>
+			<div id='main' style='display:none;'>
+				<div id='noshort'>
+					<h1>Excluding short sessions:</h1>
+					<h2>Current average: <span class='average'></span></h2>
+					<h3>Calculated from <span class='num'></span> logouts.</h3>
+				</div>
 
-			<hr />
+				<hr />
 
-			<div id='total'>
-				<h1>Including short sessions:</h1>
-				<h2>Current average: <span class='average'></span></h2>
-				<h3>Calculated from <span class='num'></span> logouts.</h3>
+				<div id='total'>
+					<h1>Including short sessions:</h1>
+					<h2>Current average: <span class='average'></span></h2>
+					<h3>Calculated from <span class='num'></span> logouts.</h3>
+				</div>
+
+				<hr />
+
+				<div>
+					Tracker runtime: <span id='runtime'></span>.
+				</div>
 			</div>
 		</div>
 	</body>
@@ -90,6 +105,8 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		"num": $('#total .num'),
 	};
 
+	var runtime = $('#runtime');
+
 	function getAverage() {
 		$.getJSON('/average', function(data) {
 			loading.hide();
@@ -99,6 +116,8 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 			noshort.num.html(data.noshort.num);
 			total.average.html(data.total.cur);
 			total.num.html(data.total.num);
+
+			runtime.html(data.runtime);
 		});
 	};
 

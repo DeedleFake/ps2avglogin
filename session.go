@@ -1,13 +1,17 @@
 package main
 
 import (
-	"encoding/gob"
+	"bytes"
+	"encoding/json"
 	"os"
+	"time"
 )
 
 type Session struct {
 	Total   RollingAverage `json:"total"`
 	NoShort RollingAverage `json:"noshort"`
+
+	Runtime timeDiff `json:"runtime"`
 }
 
 func LoadSession(path string) (s Session, err error) {
@@ -17,8 +21,10 @@ func LoadSession(path string) (s Session, err error) {
 	}
 	defer file.Close()
 
-	d := gob.NewDecoder(file)
+	d := json.NewDecoder(file)
 	err = d.Decode(&s)
+	s.Runtime = timeDiff(time.Now())
+
 	return s, err
 }
 
@@ -29,6 +35,19 @@ func (s Session) Save(path string) error {
 	}
 	defer file.Close()
 
-	e := gob.NewEncoder(file)
+	e := json.NewEncoder(file)
 	return e.Encode(&s)
+}
+
+type timeDiff time.Time
+
+func (t timeDiff) MarshalJSON() ([]byte, error) {
+	str := (time.Now().Sub(time.Time(t)) / time.Minute * time.Minute).String()
+
+	buf := bytes.NewBuffer(make([]byte, 0, len(str)))
+	buf.WriteByte('"')
+	buf.WriteString(str)
+	buf.WriteByte('"')
+
+	return buf.Bytes(), nil
 }
