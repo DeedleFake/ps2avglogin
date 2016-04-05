@@ -19,6 +19,9 @@ type Session struct {
 
 	// Runtime is a timestamp of the time that the tracker was started.
 	// timeDiff is a wrapper around time.Time.
+	//
+	// TODO: Make this a slice that can track the lengths of multiple
+	// uses of the same session.
 	Runtime timeDiff `json:"runtime"`
 }
 
