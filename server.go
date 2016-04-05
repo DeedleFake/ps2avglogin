@@ -93,12 +93,12 @@ func tmplHandler(t string) http.Handler {
 	})
 }
 
-// serveAverage serves the current session as JSON.
-func serveAverage(rw http.ResponseWriter, req *http.Request) {
+// serveSession serves the current session as JSON.
+func serveSession(rw http.ResponseWriter, req *http.Request) {
 	e := json.NewEncoder(rw)
 	err := e.Encode(<-session)
 	if err != nil {
-		log.Printf("Failed to write average: %v", err)
+		log.Printf("Failed to write session: %v", err)
 	}
 }
 
@@ -119,8 +119,8 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 
 	var runtime = $('#runtime');
 
-	function getAverage() {
-		$.getJSON('/average', function(data) {
+	function getSession() {
+		$.getJSON('/session', function(data) {
 			loading.hide();
 			main.show();
 
@@ -133,8 +133,8 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		});
 	};
 
-	getAverage();
-	setInterval(getAverage, 5000);
+	getSession();
+	setInterval(getSession, 5000);
 });`)
 	if err != nil {
 		log.Printf("Failed to write JS: %v", err)
@@ -143,7 +143,7 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 
 // server runs the web interface.
 func server() {
-	http.Handle("/average", logHandler(http.HandlerFunc(serveAverage)))
+	http.Handle("/session", logHandler(http.HandlerFunc(serveSession)))
 	http.Handle("/ps2avglogin.js", logHandler(http.HandlerFunc(serveJS)))
 	http.Handle("/", logHandler(tmplHandler("main")))
 
