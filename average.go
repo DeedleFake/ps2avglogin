@@ -5,11 +5,19 @@ import (
 	"time"
 )
 
+// A RollingAverage is an average duration that can be updated with
+// more data points.
 type RollingAverage struct {
+	// Cur is the current duration. The jsonDuration type is a light
+	// wrapper around time.Duration to make it marshal to and unmarshal from JSON properly.
 	Cur jsonDuration `json:"cur"`
-	Num int64        `json:"num"`
+
+	// Num is the number of data points that the current average was
+	// calculated from.
+	Num int64 `json:"num"`
 }
 
+// Update adds a new data point to the average.
 func (r *RollingAverage) Update(new time.Duration) time.Duration {
 	r.Cur = jsonDuration(((int64(r.Cur) * r.Num) + int64(new)) / (r.Num + 1))
 	r.Num++

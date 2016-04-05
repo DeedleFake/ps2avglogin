@@ -7,13 +7,23 @@ import (
 	"time"
 )
 
+// A Session is the current monitoring session. It keeps track of the
+// averages, how long the tracker has been running, etc.
 type Session struct {
-	Total   RollingAverage `json:"total"`
+	// Total is the total average of all session.
+	Total RollingAverage `json:"total"`
+
+	// NoShort is an average that excludes 'short' sessions. See
+	// flags.short.
 	NoShort RollingAverage `json:"noshort"`
 
+	// Runtime is a timestamp of the time that the tracker was started.
+	// timeDiff is a wrapper around time.Time.
 	Runtime timeDiff `json:"runtime"`
 }
 
+// LoadSession loads a session from the file at path. It returns the
+// session and an error, if any.
 func LoadSession(path string) (s Session, err error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -26,6 +36,9 @@ func LoadSession(path string) (s Session, err error) {
 	return s, err
 }
 
+// Save saves the session to a file at path. The file is created if it
+// doesn't exist, and truncated if it does. It returns an error if any
+// are encountered.
 func (s Session) Save(path string) error {
 	file, err := os.Create(path)
 	if err != nil {
