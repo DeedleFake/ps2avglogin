@@ -16,6 +16,10 @@ func init() {
 		"format": func(num int64, base int) string {
 			return strconv.FormatInt(num, base)
 		},
+
+		"shortlen": func() string {
+			return flags.short.String()
+		},
 	})
 
 	template.Must(serverTmpl.New("main").Parse(`<html>
@@ -42,6 +46,7 @@ func init() {
 					<h1>Excluding short sessions:</h1>
 					<h2>Current average: <span class='average'></span></h2>
 					<h3>Calculated from <span class='num'></span> logouts.</h3>
+					A session is short if it lasts less than {{shortlen}}.
 				</div>
 
 				<hr />
