@@ -16,7 +16,7 @@ var (
 	logins  = make(chan *events.PlayerLogin)
 	logouts = make(chan *events.PlayerLogout)
 
-	average = make(chan time.Duration)
+	average = make(chan RollingAverage)
 	session = make(chan *Session)
 )
 
@@ -40,7 +40,7 @@ func coord() {
 				delete(chars, ev.CharacterID)
 			}
 
-		case average <- s.Avg.Cur:
+		case average <- s.Avg:
 		case session <- &s:
 		}
 	}
