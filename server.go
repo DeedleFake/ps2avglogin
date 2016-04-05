@@ -32,7 +32,7 @@ func init() {
 	<body>
 		{{with $avg := average -}}
 			<h2>Current average: <span id='average'>{{$avg.Cur}}</span></h2>
-			<h3>Calculated from <span id='num'>{{$avg.Num}}</span> logouts.</h2>
+			<h3>Calculated from <span id='num'>{{$avg.Num}}</span> logouts.</h3>
 		{{- end}}
 	</body>
 </html>`))
