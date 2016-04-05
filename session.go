@@ -51,3 +51,15 @@ func (t timeDiff) MarshalJSON() ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
+func (t *timeDiff) UnmarshalJSON(data []byte) error {
+	data = bytes.Trim(data, `"`)
+	d, err := time.ParseDuration(string(data))
+	if err != nil {
+		return err
+	}
+
+	*t = timeDiff(time.Now().Add(-d))
+
+	return nil
+}

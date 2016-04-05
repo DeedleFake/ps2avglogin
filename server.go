@@ -134,7 +134,7 @@ func server() {
 	http.Handle("/ps2avglogin.js", logHandler(http.HandlerFunc(serveJS)))
 	http.Handle("/", logHandler(tmplHandler("main")))
 
-	log.Printf("Starting server at %q...", flags.session)
+	log.Printf("Starting server at %q...", flags.addr)
 	err := http.ListenAndServe(flags.addr, nil)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
