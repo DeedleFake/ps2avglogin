@@ -22,6 +22,7 @@ func coord() {
 		log.Printf("Failed to load session from %q: %v", flags.session, err)
 		log.Println("Creating new session...")
 	}
+	s.Runtime = timeDiff(time.Now())
 
 	chars := make(map[int64]time.Time)
 

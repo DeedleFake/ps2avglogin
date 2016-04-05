@@ -23,8 +23,6 @@ func LoadSession(path string) (s Session, err error) {
 
 	d := json.NewDecoder(file)
 	err = d.Decode(&s)
-	s.Runtime = timeDiff(time.Now())
-
 	return s, err
 }
 
@@ -41,10 +39,14 @@ func (s Session) Save(path string) error {
 
 type timeDiff time.Time
 
-func (t timeDiff) MarshalJSON() ([]byte, error) {
-	str := (time.Now().Sub(time.Time(t)) / time.Minute * time.Minute).String()
+func (t timeDiff) Since() time.Duration {
+	return time.Now().Sub(time.Time(t))
+}
 
-	buf := bytes.NewBuffer(make([]byte, 0, len(str)))
+func (t timeDiff) MarshalJSON() ([]byte, error) {
+	str := (t.Since() / time.Minute * time.Minute).String()
+
+	buf := bytes.NewBuffer(make([]byte, 0, len(str)+2))
 	buf.WriteByte('"')
 	buf.WriteString(str)
 	buf.WriteByte('"')
