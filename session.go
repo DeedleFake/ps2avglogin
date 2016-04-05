@@ -6,7 +6,8 @@ import (
 )
 
 type Session struct {
-	Avg RollingAverage
+	Total   RollingAverage `json:"total"`
+	NoShort RollingAverage `json:"noshort"`
 }
 
 func LoadSession(path string) (s Session, err error) {

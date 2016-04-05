@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"github.com/DeedleFake/census/ps2/events"
 	"log"
 	"os"
@@ -13,8 +12,7 @@ var (
 	logins  = make(chan *events.PlayerLogin)
 	logouts = make(chan *events.PlayerLogout)
 
-	average = make(chan RollingAverage)
-	session = make(chan *Session)
+	session = make(chan Session)
 )
 
 func coord() {
@@ -33,12 +31,17 @@ func coord() {
 			chars[ev.CharacterID] = time.Unix(ev.Timestamp, 0)
 		case ev := <-logouts:
 			if in, ok := chars[ev.CharacterID]; ok {
-				s.Avg.Update(time.Unix(ev.Timestamp, 0).Sub(in))
+				d := time.Unix(ev.Timestamp, 0).Sub(in)
+
+				s.Total.Update(d)
+				if d > flags.short {
+					s.NoShort.Update(d)
+				}
+
 				delete(chars, ev.CharacterID)
 			}
 
-		case average <- s.Avg:
-		case session <- &s:
+		case session <- s:
 		}
 	}
 }
@@ -74,16 +77,7 @@ func monitor() {
 	}
 }
 
-var flags struct {
-	addr    string
-	session string
-}
-
 func main() {
-	flag.StringVar(&flags.addr, "addr", ":8080", "The address to run the web interface at.")
-	flag.StringVar(&flags.session, "s", "session.data", "The session file to use.")
-	flag.Parse()
-
 	go monitor()
 	go coord()
 	go server()
