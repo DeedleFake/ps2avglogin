@@ -1,15 +1,12 @@
 package main
 
 import (
+	"flag"
 	"github.com/DeedleFake/census/ps2/events"
 	"log"
 	"os"
 	"os/signal"
 	"time"
-)
-
-const (
-	SessionFile = "session.data"
 )
 
 var (
@@ -21,10 +18,10 @@ var (
 )
 
 func coord() {
-	log.Printf("Loading session from %q...", SessionFile)
-	s, err := LoadSession(SessionFile)
+	log.Printf("Loading session from %q...", flags.session)
+	s, err := LoadSession(flags.session)
 	if err != nil {
-		log.Printf("Failed to load session from %q: %v", SessionFile, err)
+		log.Printf("Failed to load session from %q: %v", flags.session, err)
 		log.Println("Creating new session...")
 	}
 
@@ -77,7 +74,16 @@ func monitor() {
 	}
 }
 
+var flags struct {
+	addr    string
+	session string
+}
+
 func main() {
+	flag.StringVar(&flags.addr, "addr", ":8080", "The address to run the web interface at.")
+	flag.StringVar(&flags.session, "s", "session.data", "The session file to use.")
+	flag.Parse()
+
 	go monitor()
 	go coord()
 	go server()
@@ -86,9 +92,9 @@ func main() {
 	signal.Notify(sig, os.Interrupt)
 	<-sig
 
-	log.Printf("Saving session to %q...", SessionFile)
-	err := (<-session).Save(SessionFile)
+	log.Printf("Saving session to %q...", flags.session)
+	err := (<-session).Save(flags.session)
 	if err != nil {
-		log.Printf("Failed to save session to %q: %v", SessionFile, err)
+		log.Printf("Failed to save session to %q: %v", flags.session, err)
 	}
 }

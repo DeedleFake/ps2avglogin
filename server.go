@@ -85,16 +85,12 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 }
 
 func server() {
-	const (
-		ServerAddr = ":8080"
-	)
-
 	http.Handle("/average", logHandler(http.HandlerFunc(serveAverage)))
 	http.Handle("/ps2avglogin.js", logHandler(http.HandlerFunc(serveJS)))
 	http.Handle("/", logHandler(tmplHandler("main")))
 
-	log.Printf("Starting server at %q...", ServerAddr)
-	err := http.ListenAndServe(ServerAddr, nil)
+	log.Printf("Starting server at %q...", flags.session)
+	err := http.ListenAndServe(flags.addr, nil)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
