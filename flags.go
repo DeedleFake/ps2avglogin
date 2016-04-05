@@ -15,7 +15,7 @@ func init() {
 	flags.short = time.Hour
 
 	flag.StringVar(&flags.addr, "addr", ":8080", "The address to run the web interface at.")
-	flag.StringVar(&flags.session, "s", "session.data", "The session file to use.")
+	flag.StringVar(&flags.session, "s", "session.json", "The session file to use.")
 	flag.Var((*durationFlag)(&flags.short), "short", "The maximum length of a session to consider short.")
 	flag.Parse()
 }
