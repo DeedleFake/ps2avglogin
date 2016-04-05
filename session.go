@@ -17,6 +17,8 @@ type Session struct {
 	// flags.short.
 	NoShort RollingAverage `json:"noshort"`
 
+	// TODO: Add another average that doesn't include repeat characters?
+
 	// Runtime is a timestamp of the time that the tracker was started.
 	// timeDiff is a wrapper around time.Time.
 	//
