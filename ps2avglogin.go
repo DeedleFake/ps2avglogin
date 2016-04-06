@@ -39,6 +39,8 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 		case ev := <-logins:
 			chars[ev.CharacterID] = time.Unix(ev.Timestamp, 0)
 		case ev := <-logouts:
+			// TODO: Use the REST API to get login times, rather than
+			// tracking it manually.
 			if in, ok := chars[ev.CharacterID]; ok {
 				d := time.Unix(ev.Timestamp, 0).Sub(in)
 
