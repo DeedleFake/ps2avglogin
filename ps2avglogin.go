@@ -24,6 +24,8 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 		log.Println("Creating new session...")
 	}
 	s.Runtime = timeDiff(time.Now())
+	s.Longest = 0
+	s.Shortest = jsonDuration(1000 * time.Hour) // Just need something ridiculous.
 
 	chars := make(map[int64]time.Time)
 
@@ -40,13 +42,21 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 			chars[ev.CharacterID] = time.Unix(ev.Timestamp, 0)
 		case ev := <-logouts:
 			// TODO: Use the REST API to get login times, rather than
-			// tracking it manually.
+			// tracking it manually. I don't know why I didn't do that in
+			// the first place...
 			if in, ok := chars[ev.CharacterID]; ok {
 				d := time.Unix(ev.Timestamp, 0).Sub(in)
 
 				s.Total.Update(d)
 				if d > flags.short {
 					s.NoShort.Update(d)
+				}
+
+				if d > time.Duration(s.Longest) {
+					s.Longest = jsonDuration(d)
+				}
+				if d < time.Duration(s.Shortest) {
+					s.Shortest = jsonDuration(d)
 				}
 
 				delete(chars, ev.CharacterID)

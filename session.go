@@ -17,6 +17,11 @@ type Session struct {
 	// flags.short.
 	NoShort RollingAverage `json:"noshort"`
 
+	// Longest and Shortest are the longest and shortest sessions that
+	// have completed this session, respectively.
+	Longest  jsonDuration `json:"longest"`
+	Shortest jsonDuration `json:"shortest"`
+
 	// TODO: Add another average that doesn't include repeat characters?
 
 	// Runtime is a timestamp of the time that the tracker was started.

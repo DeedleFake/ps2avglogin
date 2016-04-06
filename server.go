@@ -75,6 +75,13 @@ func init() {
 
 				<hr />
 
+				<div>
+					<h2>Longest session: <span id='longest'></span></h2>
+					<h2>Shortest session: <span id='shortest'></span></h2>
+				</div>
+
+				<hr />
+
 				Currently tracking <span id='online'></span> active sessions.<br />
 				Tracker runtime: <span id='runtime'></span>
 			</div>
@@ -131,6 +138,9 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		"num": $('#total .num'),
 	};
 
+	var longest = $('#longest');
+	var shortest = $('#shortest');
+
 	var online = $('#online');
 	var runtime = $('#runtime');
 
@@ -145,6 +155,9 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		noshort.num.html(data.noshort.num);
 		total.average.html(data.total.cur);
 		total.num.html(data.total.num);
+
+		longest.html(data.longest);
+		shortest.html(data.shortest);
 
 		online.html(data.numchars);
 		runtime.html(data.runtime);
