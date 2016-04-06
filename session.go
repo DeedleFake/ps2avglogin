@@ -29,6 +29,9 @@ type Session struct {
 	// NumChars is the number of online characters that are currently
 	// being tracked.
 	NumChars int `json:"numchars"`
+
+	// Err is holds any errors encountered by the monitor.
+	Err error `json:"err,omitempty"`
 }
 
 // LoadSession loads a session from the file at path. It returns the

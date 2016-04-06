@@ -16,7 +16,7 @@ var (
 // coord coordinates the session, updating it properly when login and
 // logout events occur, and sending a copy of the session down the
 // session channel when it's requested.
-func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogout) {
+func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogout, errors <-chan error) {
 	log.Printf("Loading session from %q...", flags.session)
 	s, err := LoadSession(flags.session)
 	if err != nil {
@@ -50,6 +50,9 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 				delete(chars, ev.CharacterID)
 			}
 
+		case err := <-errors:
+			s.Err = err
+
 		case session <- copySession():
 		}
 	}
@@ -58,7 +61,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 // monitor connects to the census API, subscribes to PlayerLogin and
 // PlayerLogout events, and then sends them down the appropriate
 // channels.
-func monitor(logins chan<- *events.PlayerLogin, logouts chan<- *events.PlayerLogout) {
+func monitor(logins chan<- *events.PlayerLogin, logouts chan<- *events.PlayerLogout, errors chan<- error) {
 	cl, err := events.NewClient("", "", "example")
 	if err != nil {
 		log.Fatalf("Failed to open client: %v", err)
@@ -78,8 +81,10 @@ func monitor(logins chan<- *events.PlayerLogin, logouts chan<- *events.PlayerLog
 		ev, err := cl.Next()
 		if err != nil {
 			log.Printf("Error while fetching event: %v", err)
+			errors <- err
 			continue
 		}
+		errors <- nil
 
 		switch ev := ev.(type) {
 		case *events.PlayerLogin:
@@ -93,9 +98,10 @@ func monitor(logins chan<- *events.PlayerLogin, logouts chan<- *events.PlayerLog
 func main() {
 	logins := make(chan *events.PlayerLogin)
 	logouts := make(chan *events.PlayerLogout)
+	errors := make(chan error)
 
-	go monitor(logins, logouts)
-	go coord(logins, logouts)
+	go monitor(logins, logouts, errors)
+	go coord(logins, logouts, errors)
 	go server()
 
 	sig := make(chan os.Signal)

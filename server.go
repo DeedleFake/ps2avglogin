@@ -35,10 +35,25 @@ func init() {
 			{
 				width:80%;
 			}
+
+			#error
+			{
+				background-color:#EE0000;
+
+				position:fixed;
+				top:0px;
+				left:0px;
+				right:0px;
+
+				text-align:center;
+				padding:4px;
+				display:none;
+			}
 		</style>
 	</head>
 	<body style='background-color:#EEEEEE;'>
-	<div style='max-width:640px;margin-left:auto;margin-right:auto;'>
+		<div id='error'></div>
+		<div style='max-width:640px;margin-left:auto;margin-right:auto;'>
 			<div id='loading'>
 				<h2>Loading...</h2>
 			</div>
@@ -119,19 +134,35 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 	var online = $('#online');
 	var runtime = $('#runtime');
 
-	function getSession() {
-		$.getJSON('/session', function(data) {
-			loading.hide();
-			main.show();
+	var error = $('#error');
 
-			noshort.average.html(data.noshort.cur);
-			noshort.num.html(data.noshort.num);
-			total.average.html(data.total.cur);
-			total.num.html(data.total.num);
+	function setFields(data)
+	{
+		loading.hide();
+		main.show();
 
-			online.html(data.numchars);
-			runtime.html(data.runtime);
-		});
+		noshort.average.html(data.noshort.cur);
+		noshort.num.html(data.noshort.num);
+		total.average.html(data.total.cur);
+		total.num.html(data.total.num);
+
+		online.html(data.numchars);
+		runtime.html(data.runtime);
+
+		if (data.err != undefined)
+		{
+			error.html('Error fetching data from Census API: ' + data.err);
+			error.slideDown('fast');
+		}
+		else
+		{
+			error.slideUp('fast');
+		}
+	}
+
+	function getSession()
+	{
+		$.getJSON('/session', setFields);
 	};
 
 	getSession();
