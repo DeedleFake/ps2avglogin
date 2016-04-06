@@ -6,7 +6,7 @@ ps2avglogin is a simple tracker that scans login and logout events in [PlanetSid
 Installation
 ------------
 
-To install, first you will need a working [Go toolchain][go] of at least version 1.6. Next you will need to set up your [GOPATH][gopath]. Once this is done, simply run
+To install, first you will need a working [Go toolchain][go] that is at least version 1.6. Next you will need to set up your [GOPATH][gopath]. Once this is done, simply run
 
 > go get github.com/DeedleFake/ps2avglogin
 
@@ -15,7 +15,7 @@ to install ps2avglogin.
 Usage
 -----
 
-For usage information, simple run `ps2avglogin -help`. Just running `ps2avglogin` should be good enough for most use cases.
+For usage information, simply run `ps2avglogin -help`. Just running `ps2avglogin` should be good enough for most use cases.
 
 Authors
 -------
