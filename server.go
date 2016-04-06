@@ -162,7 +162,10 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 
 	function getSession()
 	{
-		$.getJSON('/session', setFields);
+		$.getJSON('/session').done(setFields).fail(function() {
+			error.html('Error connecting to ps2avglogin server.');
+			error.slideDown('fast');
+		});
 	};
 
 	getSession();
