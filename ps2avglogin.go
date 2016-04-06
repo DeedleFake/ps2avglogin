@@ -77,7 +77,8 @@ func monitor(logins chan<- *events.PlayerLogin, logouts chan<- *events.PlayerLog
 	for {
 		ev, err := cl.Next()
 		if err != nil {
-			log.Fatalf("Error while fetching event: %v", err)
+			log.Printf("Error while fetching event: %v", err)
+			continue
 		}
 
 		switch ev := ev.(type) {
