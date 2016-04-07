@@ -8,4 +8,4 @@ RUN mkdir -p /data
 WORKDIR /data
 
 EXPOSE 8080
-CMD ["ps2avglogin"]
+ENTRYPOINT ["ps2avglogin"]
