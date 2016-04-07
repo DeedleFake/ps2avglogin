@@ -1,7 +1,8 @@
 FROM golang
 MAINTAINER DeedleFake
 
-RUN go get -u -v github.com/DeedleFake/ps2avglogin
+COPY . /go/src/github.com/DeedleFake/ps2avglogin/
+RUN go get -v github.com/DeedleFake/ps2avglogin
 
 RUN mkdir -p /data
 WORKDIR /data
