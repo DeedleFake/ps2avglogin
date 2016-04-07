@@ -178,11 +178,12 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		$.getJSON('/session').done(setFields).fail(function() {
 			error.html('Error connecting to ps2avglogin server.');
 			error.slideDown('fast');
+		}).always(function() {
+			setTimeout(getSession, 30000);
 		});
 	};
 
 	getSession();
-	setInterval(getSession, 5000);
 });`)
 	if err != nil {
 		log.Printf("Failed to write JS: %v", err)
