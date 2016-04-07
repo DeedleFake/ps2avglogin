@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -117,8 +118,8 @@ func main() {
 	go server()
 
 	sig := make(chan os.Signal)
-	signal.Notify(sig, os.Interrupt)
-	<-sig
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+	log.Printf("Caught signal %q", <-sig)
 
 	log.Printf("Saving session to %q...", flags.session)
 	err := (<-session).Save(flags.session)
