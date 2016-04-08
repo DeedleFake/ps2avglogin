@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
 
@@ -39,4 +41,50 @@ func (db mapDB) Num() int {
 
 func (db mapDB) Close() error {
 	return nil
+}
+
+type sqliteDB struct {
+	*sql.DB
+
+	add *sql.Stmt
+	get *sql.Stmt
+	rem *sql.Stmt
+
+	num int
+}
+
+func newsqliteDB(path string) (DB, error) {
+	db, err := sql.Open("sqlite3", path)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec(`DROP TABLE chars`)
+	if err != nil {
+		return nil, err
+	}
+
+	return &sqliteDB{
+		DB: db,
+	}, nil
+}
+
+func (db *sqliteDB) Set(id int64, login time.Time) {
+	panic("Not implemented.")
+}
+
+func (db *sqliteDB) Get(id int64) (time.Time, bool) {
+	panic("Not implemented.")
+}
+
+func (db *sqliteDB) Remove(id int64) {
+	panic("Not implemented.")
+}
+
+func (db *sqliteDB) Num() int {
+	panic("Not implemented.")
+}
+
+func (db *sqliteDB) Close() error {
+	panic("Not implemented.")
 }
