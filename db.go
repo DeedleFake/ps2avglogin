@@ -71,6 +71,16 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS chars (id INTEGER PRIMARY KEY, login INTEGER)`)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec(`DELETE FROM chars`)
+	if err != nil {
+		return nil, err
+	}
+
 	add, err := db.Prepare(`INSERT OR REPLACE INTO chars (id, login) VALUES (?, ?)`)
 	if err != nil {
 		return nil, err
@@ -82,16 +92,6 @@ func newsqliteDB(path string) (DB, error) {
 	}
 
 	rem, err := db.Prepare(`DELETE FROM chars WHERE id=?`)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS chars (id INTEGER PRIMARY KEY, login INTEGER)`)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = db.Exec(`DELETE FROM chars`)
 	if err != nil {
 		return nil, err
 	}
