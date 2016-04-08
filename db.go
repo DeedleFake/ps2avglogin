@@ -55,6 +55,7 @@ func (db mapDB) Close() error {
 	return nil
 }
 
+// TODO: Find a way to do some of this asynchronously.
 type sqliteDB struct {
 	*sql.DB
 
@@ -71,12 +72,12 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS chars (id INTEGER PRIMARY KEY, login INTEGER)`)
+	_, err = db.Exec(`DROP TABLE IF EXISTS chars`)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = db.Exec(`DELETE FROM chars`)
+	_, err = db.Exec(`CREATE TABLE chars (id INTEGER PRIMARY KEY, login TIMESTAMP)`)
 	if err != nil {
 		return nil, err
 	}
@@ -119,10 +120,11 @@ func (db *sqliteDB) Set(id int64, login time.Time) error {
 func (db *sqliteDB) Get(id int64) (time.Time, bool, error) {
 	var login time.Time
 	err := db.get.QueryRow(id).Scan(&login)
-	switch err {
-	case sql.ErrNoRows:
-		return login, false, nil
-	default:
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return login, false, nil
+		}
+
 		return login, false, err
 	}
 
