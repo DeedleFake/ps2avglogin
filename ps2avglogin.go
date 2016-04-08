@@ -44,9 +44,18 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 	for {
 		select {
 		case ev := <-logins:
-			chars.Set(ev.CharacterID, time.Unix(ev.Timestamp, 0))
+			err := chars.Set(ev.CharacterID, time.Unix(ev.Timestamp, 0))
+			if err != nil {
+				// Not a fatal error.
+				log.Printf("Failed to add %v to DB: %v", ev.CharacterID, err)
+			}
 		case ev := <-logouts:
-			if in, ok := chars.Get(ev.CharacterID); ok {
+			in, ok, err := chars.Get(ev.CharacterID)
+			if err != nil {
+				log.Printf("Failed to get %v from DB: %v", ev.CharacterID, err)
+				continue
+			}
+			if ok {
 				d := time.Unix(ev.Timestamp, 0).Sub(in)
 
 				s.Total.Update(d)
@@ -61,7 +70,10 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 					s.Shortest = jsonDuration(d)
 				}
 
-				chars.Remove(ev.CharacterID)
+				err := chars.Remove(ev.CharacterID)
+				if err != nil {
+					log.Printf("Failed to remove %v from DB: %v", ev.CharacterID, err)
+				}
 			}
 
 		case err := <-errors:
