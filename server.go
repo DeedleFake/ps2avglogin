@@ -61,6 +61,7 @@ func init() {
 				<div id='noshort'>
 					<h1>Excluding short sessions:</h1>
 					<h2>Average session: <span class='average'></span></h2>
+					Standard deviation: <span class='stddev'></span><br />
 					<h3>Calculated from <span class='num'></span> sessions.</h3>
 					A session is short if it lasts less than {{shortlen}}.
 				</div>
@@ -70,6 +71,7 @@ func init() {
 				<div id='total'>
 					<h1>Including short sessions:</h1>
 					<h2>Average session: <span class='average'></span></h2>
+					Standard deviation: <span class='stddev'></span><br />
 					<h3>Calculated from <span class='num'></span> sessions.</h3>
 				</div>
 
@@ -131,10 +133,12 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 
 	var noshort = {
 		"average": $('#noshort .average'),
+		"stddev": $('#noshort .stddev'),
 		"num": $('#noshort .num'),
 	};
 	var total = {
 		"average": $('#total .average'),
+		"stddev": $('#total .stddev'),
 		"num": $('#total .num'),
 	};
 
@@ -152,8 +156,10 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		main.show();
 
 		noshort.average.html(data.noshort.cur);
+		noshort.stddev.html(data.noshort.stddev);
 		noshort.num.html(data.noshort.num);
 		total.average.html(data.total.cur);
+		total.stddev.html(data.total.stddev);
 		total.num.html(data.total.num);
 
 		longest.html(data.longest);
