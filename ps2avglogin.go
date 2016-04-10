@@ -26,6 +26,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 	}
 	s.Runtime = timeDiff(time.Now())
 	s.Longest = 0
+	s.ShortestLong = jsonDuration(1000 * time.Hour)
 	s.Shortest = jsonDuration(1000 * time.Hour) // Just need something ridiculous.
 
 	chars, err := createDB()
@@ -61,6 +62,10 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 				s.Total.Update(d)
 				if d > flags.short {
 					s.NoShort.Update(d)
+
+					if d < time.Duration(s.ShortestLong) {
+						s.ShortestLong = jsonDuration(d)
+					}
 				}
 
 				if d > time.Duration(s.Longest) {

@@ -19,8 +19,9 @@ type Session struct {
 
 	// Longest and Shortest are the longest and shortest sessions that
 	// have completed this session, respectively.
-	Longest  jsonDuration `json:"longest"`
-	Shortest jsonDuration `json:"shortest"`
+	Longest      jsonDuration `json:"longest"`
+	ShortestLong jsonDuration `json:"shortestlong"`
+	Shortest     jsonDuration `json:"shortest"`
 
 	// TODO: Add another average that doesn't include repeat characters?
 
