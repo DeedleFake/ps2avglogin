@@ -10,10 +10,9 @@ import (
 
 // flags stores the command line flags and arguments.
 var flags struct {
-	addr    string
-	session string
-	short   time.Duration
-	db      mapFlag
+	addr  string
+	short time.Duration
+	db    mapFlag
 }
 
 func init() {
@@ -21,7 +20,6 @@ func init() {
 	flags.db = mapFlag{"type": "map"}
 
 	flag.StringVar(&flags.addr, "addr", ":8080", "The address to run the web interface at.")
-	flag.StringVar(&flags.session, "s", "session.json", "The session file to use.")
 	flag.Var((*durationFlag)(&flags.short), "short", "The maximum length of a session to consider short.")
 	flag.Var(&flags.db, "db", "Options for the database.")
 

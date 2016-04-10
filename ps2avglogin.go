@@ -18,10 +18,16 @@ var (
 // logout events occur, and sending a copy of the session down the
 // session channel when it's requested.
 func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogout, errors <-chan error) {
-	log.Printf("Loading session from %q...", flags.session)
-	s, err := LoadSession(flags.session)
+	db, err := createDB()
 	if err != nil {
-		log.Printf("Failed to load session from %q: %v", flags.session, err)
+		log.Fatalf("Failed to create database: %v", err)
+	}
+	defer db.Close()
+
+	log.Println("Loading session...")
+	s, err := db.LoadSession()
+	if err != nil {
+		log.Printf("Failed to load session: %v", err)
 		log.Println("Creating new session...")
 	}
 	s.Runtime = timeDiff(time.Now())
@@ -29,15 +35,9 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 	s.ShortestLong = jsonDuration(1000 * time.Hour)
 	s.Shortest = jsonDuration(1000 * time.Hour) // Just need something ridiculous.
 
-	chars, err := createDB()
-	if err != nil {
-		log.Fatalf("Failed to create database: %v", err)
-	}
-	defer chars.Close()
-
 	copySession := func() Session {
 		s := s
-		s.NumChars = chars.Num()
+		s.NumChars = db.NumChar()
 
 		return s
 	}
@@ -45,13 +45,13 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 	for {
 		select {
 		case ev := <-logins:
-			err := chars.Set(ev.CharacterID, time.Unix(ev.Timestamp, 0))
+			err := db.SetChar(ev.CharacterID, time.Unix(ev.Timestamp, 0))
 			if err != nil {
 				// Not a fatal error.
 				log.Printf("Failed to add %v to DB: %v", ev.CharacterID, err)
 			}
 		case ev := <-logouts:
-			in, ok, err := chars.Get(ev.CharacterID)
+			in, ok, err := db.GetChar(ev.CharacterID)
 			if err != nil {
 				log.Printf("Failed to get %v from DB: %v", ev.CharacterID, err)
 				continue
@@ -75,7 +75,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 					s.Shortest = jsonDuration(d)
 				}
 
-				err := chars.Remove(ev.CharacterID)
+				err := db.RemoveChar(ev.CharacterID)
 				if err != nil {
 					log.Printf("Failed to remove %v from DB: %v", ev.CharacterID, err)
 				}
@@ -139,9 +139,9 @@ func main() {
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 	log.Printf("Caught signal %q", <-sig)
 
-	log.Printf("Saving session to %q...", flags.session)
-	err := (<-session).Save(flags.session)
+	log.Println("Saving session...")
+	err := (<-session).Save()
 	if err != nil {
-		log.Printf("Failed to save session to %q: %v", flags.session, err)
+		log.Printf("Failed to save session: %v", err)
 	}
 }

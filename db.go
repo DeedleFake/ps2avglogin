@@ -2,18 +2,23 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"os"
 	"time"
 )
 
 type DB interface {
-	Set(int64, time.Time) error
-	Get(int64) (time.Time, bool, error)
-	Remove(int64) error
+	SetChar(int64, time.Time) error
+	GetChar(int64) (time.Time, bool, error)
+	RemoveChar(int64) error
+	NumChar() int
 
-	Num() int
+	LoadSession() (Session, error)
+	SaveSession(s Session) error
+
 	Close() error
 }
 
@@ -21,9 +26,16 @@ func createDB() (DB, error) {
 	switch t := flags.db["type"]; t {
 	case "map":
 		log.Printf("Using %q for DB.", t)
+
+		if flags.db["s"] == "" {
+			flags.db["s"] = "session.json"
+		}
+
 		return make(mapDB), nil
+
 	case "sqlite", "sqlite3":
 		log.Printf("Using %q for DB.", t)
+
 		return newsqliteDB(flags.db["db"])
 	}
 
@@ -32,23 +44,47 @@ func createDB() (DB, error) {
 
 type mapDB map[int64]time.Time
 
-func (db mapDB) Set(id int64, login time.Time) error {
+func (db mapDB) SetChar(id int64, login time.Time) error {
 	db[id] = login
 	return nil
 }
 
-func (db mapDB) Get(id int64) (time.Time, bool, error) {
+func (db mapDB) GetChar(id int64) (time.Time, bool, error) {
 	login, ok := db[id]
 	return login, ok, nil
 }
 
-func (db mapDB) Remove(id int64) error {
+func (db mapDB) RemoveChar(id int64) error {
 	delete(db, id)
 	return nil
 }
 
-func (db mapDB) Num() int {
+func (db mapDB) NumChar() int {
 	return len(db)
+}
+
+func (db mapDB) LoadSession() (s Session, err error) {
+	file, err := os.Open(flags.db["s"])
+	if err != nil {
+		return s, err
+	}
+	defer file.Close()
+
+	d := json.NewDecoder(file)
+	err = d.Decode(&s)
+	s.db = db
+	return s, err
+}
+
+func (db mapDB) SaveSession(s Session) error {
+	file, err := os.Create(flags.db["s"])
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	e := json.NewEncoder(file)
+	return e.Encode(&s)
 }
 
 func (db mapDB) Close() error {
@@ -106,7 +142,7 @@ func newsqliteDB(path string) (DB, error) {
 	}, nil
 }
 
-func (db *sqliteDB) Set(id int64, login time.Time) error {
+func (db *sqliteDB) SetChar(id int64, login time.Time) error {
 	_, err := db.add.Exec(id, login)
 	if err != nil {
 		return err
@@ -117,7 +153,7 @@ func (db *sqliteDB) Set(id int64, login time.Time) error {
 	return nil
 }
 
-func (db *sqliteDB) Get(id int64) (time.Time, bool, error) {
+func (db *sqliteDB) GetChar(id int64) (time.Time, bool, error) {
 	var login time.Time
 	err := db.get.QueryRow(id).Scan(&login)
 	if err != nil {
@@ -131,7 +167,7 @@ func (db *sqliteDB) Get(id int64) (time.Time, bool, error) {
 	return login, true, nil
 }
 
-func (db *sqliteDB) Remove(id int64) error {
+func (db *sqliteDB) RemoveChar(id int64) error {
 	res, err := db.rem.Exec(id)
 	if err != nil {
 		return err
@@ -145,6 +181,16 @@ func (db *sqliteDB) Remove(id int64) error {
 	return nil
 }
 
-func (db *sqliteDB) Num() int {
+func (db *sqliteDB) NumChar() int {
 	return db.num
+}
+
+func (db *sqliteDB) LoadSession() (s Session, err error) {
+	s, err = mapDB{}.LoadSession()
+	s.db = db
+	return
+}
+
+func (db *sqliteDB) SaveSession(s Session) error {
+	return mapDB{}.SaveSession(s)
 }

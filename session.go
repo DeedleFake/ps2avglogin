@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
-	"os"
 	"time"
 )
 
@@ -27,9 +25,6 @@ type Session struct {
 
 	// Runtime is a timestamp of the time that the tracker was started.
 	// timeDiff is a wrapper around time.Time.
-	//
-	// TODO: Make this a slice that can track the lengths of multiple
-	// uses of the same session.
 	Runtime timeDiff `json:"runtime"`
 
 	// NumChars is the number of online characters that are currently
@@ -38,34 +33,14 @@ type Session struct {
 
 	// Err is holds any errors encountered by the monitor.
 	Err error `json:"err,omitempty"`
+
+	// db stores the current database so that a session knows how to
+	// save itself.
+	db DB
 }
 
-// LoadSession loads a session from the file at path. It returns the
-// session and an error, if any.
-func LoadSession(path string) (s Session, err error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return s, err
-	}
-	defer file.Close()
-
-	d := json.NewDecoder(file)
-	err = d.Decode(&s)
-	return s, err
-}
-
-// Save saves the session to a file at path. The file is created if it
-// doesn't exist, and truncated if it does. It returns an error if any
-// are encountered.
-func (s Session) Save(path string) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	e := json.NewEncoder(file)
-	return e.Encode(&s)
+func (s Session) Save() error {
+	return s.db.SaveSession(s)
 }
 
 // timeDiff is a light wrapper around time.Time that marshals to JSON
