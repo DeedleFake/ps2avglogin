@@ -138,13 +138,13 @@ func main() {
 	go coord(logins, logouts, errors)
 	go server()
 
+	cancel := make(chan struct{})
+	go autosave(cancel)
+
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 	log.Printf("Caught signal %q", <-sig)
 
-	log.Println("Saving session...")
-	err := (<-session).Save()
-	if err != nil {
-		log.Printf("Failed to save session: %v", err)
-	}
+	cancel <- struct{}{}
+	<-cancel
 }

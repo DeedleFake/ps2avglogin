@@ -10,18 +10,21 @@ import (
 
 // flags stores the command line flags and arguments.
 var flags struct {
-	addr  string
-	short time.Duration
-	db    mapFlag
+	addr     string
+	short    time.Duration
+	db       mapFlag
+	autosave time.Duration
 }
 
 func init() {
 	flags.short = time.Hour
 	flags.db = mapFlag{"type": "map"}
+	flags.autosave = 5 * time.Minute
 
 	flag.StringVar(&flags.addr, "addr", ":8080", "The address to run the web interface at.")
 	flag.Var((*durationFlag)(&flags.short), "short", "The maximum length of a session to consider short.")
 	flag.Var(&flags.db, "db", "Options for the database.")
+	flag.Var((*durationFlag)(&flags.autosave), "autosave", "Autosave the session every `n`. 0 disables autosaving.")
 
 	flag.Parse()
 }

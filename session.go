@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"log"
 	"time"
 )
 
@@ -41,6 +42,38 @@ type Session struct {
 
 func (s Session) Save() error {
 	return s.db.SaveSession(s)
+}
+
+func autosave(cancel chan struct{}) {
+	defer func() {
+		log.Println("Saving session...")
+		err := (<-session).Save()
+		if err != nil {
+			log.Printf("Failed to save session: %v", err)
+		}
+
+		close(cancel)
+	}()
+
+	var tick <-chan time.Time
+	if flags.autosave > 0 {
+		log.Printf("Autosaving every %v.", flags.autosave)
+		tick = time.Tick(flags.autosave)
+	}
+
+	for {
+		select {
+		case <-tick:
+			log.Printf("Autosaving session...")
+			err := (<-session).Save()
+			if err != nil {
+				log.Printf("Error autosaving session: %v", err)
+			}
+
+		case <-cancel:
+			return
+		}
+	}
 }
 
 // timeDiff is a light wrapper around time.Time that marshals to JSON
