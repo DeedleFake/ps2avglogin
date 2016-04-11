@@ -45,6 +45,10 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 		return s
 	}
 
+	longestName := make(chan string, 1)
+	longestNameDone := make(chan struct{})
+	close(longestNameDone)
+
 	for {
 		select {
 		case ev := <-logins:
@@ -73,6 +77,10 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 
 				if d > time.Duration(s.Longest) {
 					s.Longest = jsonDuration(d)
+
+					<-longestNameDone
+					longestNameDone = make(chan struct{})
+					go getName(longestName, ev.CharacterID, longestNameDone)
 				}
 				if d < time.Duration(s.Shortest) {
 					s.Shortest = jsonDuration(d)
@@ -83,6 +91,9 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 					log.Printf("Failed to remove %v from DB: %v", ev.CharacterID, err)
 				}
 			}
+
+		case name := <-longestName:
+			s.LongestName = name
 
 		case err := <-errors:
 			s.Err = err

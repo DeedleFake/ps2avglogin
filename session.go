@@ -18,7 +18,12 @@ type Session struct {
 
 	// Longest and Shortest are the longest and shortest sessions that
 	// have completed this session, respectively.
-	Longest      jsonDuration `json:"longest"`
+	//
+	// LongestName is the name of the character who played that longest
+	// session.
+	Longest     jsonDuration `json:"longest"`
+	LongestName string       `json:"longestname"`
+
 	ShortestLong jsonDuration `json:"shortestlong"`
 	Shortest     jsonDuration `json:"shortest"`
 

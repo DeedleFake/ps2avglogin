@@ -31,6 +31,12 @@ func init() {
 		<script type='application/javascript' src='/ps2avglogin.js' defer></script>
 
 		<style type='text/css'>
+			body
+			{
+				background-color:#EEEEEE;
+				font-family:Arial;
+			}
+
 			hr
 			{
 				width:80%;
@@ -51,7 +57,7 @@ func init() {
 			}
 		</style>
 	</head>
-	<body style='background-color:#EEEEEE;'>
+	<body>
 		<div id='error'></div>
 		<div style='max-width:640px;margin-left:auto;margin-right:auto;'>
 			<div id='loading'>
@@ -78,7 +84,7 @@ func init() {
 				<hr />
 
 				<div>
-					<h2>Longest session: <span id='longest'></span></h2>
+					<h2>Longest session: <span id='longest'></span> <span id='longestname'></span></h2>
 					<h2>Shortest long session: <span id='shortestlong'></span></h2>
 					<h2>Shortest session: <span id='shortest'></span></h2>
 				</div>
@@ -144,6 +150,7 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 	};
 
 	var longest = $('#longest');
+	var longestname = $('#longestname');
 	var shortestlong = $('#shortestlong');
 	var shortest = $('#shortest');
 
@@ -165,6 +172,7 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		total.num.html(data.total.num);
 
 		longest.html(data.longest);
+		longestname.html('(' + data.longestname + ')');
 		shortestlong.html(data.shortestlong);
 		shortest.html(data.shortest);
 
