@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
+	"reflect"
 	"time"
 )
 
@@ -98,8 +99,10 @@ type sqliteDB struct {
 	add *sql.Stmt
 	get *sql.Stmt
 	rem *sql.Stmt
-
 	num int
+
+	sadd *sql.Stmt
+	sget *sql.Stmt
 }
 
 func newsqliteDB(path string) (DB, error) {
@@ -118,17 +121,32 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS session (id TEXT PRIMARY KEY, valstr TEXT, valint INTEGER)`)
+	if err != nil {
+		return nil, err
+	}
+
 	add, err := db.Prepare(`INSERT OR REPLACE INTO chars (id, login) VALUES (?, ?)`)
 	if err != nil {
 		return nil, err
 	}
 
-	get, err := db.Prepare(`SELECT (login) FROM chars WHERE id=?`)
+	get, err := db.Prepare(`SELECT login FROM chars WHERE id=?`)
 	if err != nil {
 		return nil, err
 	}
 
 	rem, err := db.Prepare(`DELETE FROM chars WHERE id=?`)
+	if err != nil {
+		return nil, err
+	}
+
+	sadd, err := db.Prepare(`INSERT OR REPLACE INTO session (id, valstr, valint) VALUES (?, ?, ?)`)
+	if err != nil {
+		return nil, err
+	}
+
+	sget, err := db.Prepare(`SELECT valstr, valint FROM session WHERE id=?`)
 	if err != nil {
 		return nil, err
 	}
@@ -139,6 +157,9 @@ func newsqliteDB(path string) (DB, error) {
 		add: add,
 		get: get,
 		rem: rem,
+
+		sadd: sadd,
+		sget: sget,
 	}, nil
 }
 
@@ -186,11 +207,42 @@ func (db *sqliteDB) NumChar() int {
 }
 
 func (db *sqliteDB) LoadSession() (s Session, err error) {
-	s, err = mapDB{}.LoadSession()
+	err = walkStruct(&s, func(name string, field reflect.Value) error {
+		var valstr string
+		var valint int64
+		err := db.sget.QueryRow(name).Scan(&valstr, &valint)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// Just ignore fields that aren't in the database.
+				return nil
+			}
+
+			return err
+		}
+
+		switch field.Kind() {
+		case reflect.String:
+			field.SetString(valstr)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			field.SetInt(valint)
+		}
+
+		return nil
+	})
+
 	s.db = db
 	return
 }
 
 func (db *sqliteDB) SaveSession(s Session) error {
-	return mapDB{}.SaveSession(s)
+	return walkStruct(&s, func(name string, field reflect.Value) (err error) {
+		switch field.Kind() {
+		case reflect.String:
+			_, err = db.sadd.Exec(name, field.String(), 0)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			_, err = db.sadd.Exec(name, "", field.Int())
+		}
+
+		return
+	})
 }
