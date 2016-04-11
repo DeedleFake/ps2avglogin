@@ -37,6 +37,10 @@ func createDB() (DB, error) {
 	case "sqlite", "sqlite3":
 		log.Printf("Using %q for DB.", t)
 
+		if flags.db["db"] == "" {
+			flags.db["db"] = "session.db"
+		}
+
 		return newsqliteDB(flags.db["db"])
 	}
 
