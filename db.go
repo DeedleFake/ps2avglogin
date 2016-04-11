@@ -69,6 +69,10 @@ func (db mapDB) NumChar() int {
 }
 
 func (db mapDB) LoadSession() (s Session, err error) {
+	defer func() {
+		s.db = db
+	}()
+
 	file, err := os.Open(flags.db["s"])
 	if err != nil {
 		return s, err
@@ -77,7 +81,6 @@ func (db mapDB) LoadSession() (s Session, err error) {
 
 	d := json.NewDecoder(file)
 	err = d.Decode(&s)
-	s.db = db
 	return s, err
 }
 
