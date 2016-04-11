@@ -31,9 +31,12 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 		log.Println("Creating new session...")
 	}
 	s.Runtime = timeDiff(time.Now())
-	s.Longest = 0
-	s.ShortestLong = jsonDuration(1000 * time.Hour)
-	s.Shortest = jsonDuration(1000 * time.Hour) // Just need something ridiculous.
+	if s.ShortestLong == 0 {
+		s.ShortestLong = jsonDuration(1000 * time.Hour)
+	}
+	if s.Shortest == 0 {
+		s.Shortest = jsonDuration(1000 * time.Hour)
+	}
 
 	copySession := func() Session {
 		s := s
