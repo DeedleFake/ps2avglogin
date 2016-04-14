@@ -66,7 +66,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 				if err != nil {
 					log.Printf("Failed to get name for %v: %v", ev.CharacterID, err)
 				}
-				log.Printf("New oldest session is %q (%v) since %v", s.OldestName, ev.CharacterID, s.Oldest)
+				log.Printf("New oldest session is %q (%v) since %v", s.OldestName, ev.CharacterID, time.Time(s.Oldest))
 			}
 
 		case ev := <-logouts:
@@ -93,7 +93,6 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 					s.LongestName, err = getName(ev.CharacterID)
 					if err != nil {
 						log.Printf("Failed to get name for %v: %v", ev.CharacterID, err)
-						s.LongestName = ""
 					}
 					log.Printf("New longest session record is held by %q (%v) at %v", s.LongestName, ev.CharacterID, s.Longest)
 				}
@@ -118,7 +117,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 					if err != nil {
 						log.Printf("Failed to get name for %v: %v", id, err)
 					}
-					log.Printf("New oldest session is %q (%v) since %v", s.OldestName, id, s.Oldest)
+					log.Printf("New oldest session is %q (%v) since %v", s.OldestName, id, time.Time(s.Oldest))
 				}
 			}
 

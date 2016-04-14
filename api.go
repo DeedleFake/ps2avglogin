@@ -17,7 +17,13 @@ var (
 	}
 )
 
-func getName(id int64) (string, error) {
+func getName(id int64) (name string, err error) {
+	defer func() {
+		if err != nil {
+			name = strconv.FormatInt(id, 10)
+		}
+	}()
+
 	var data struct {
 		Chars []struct {
 			Name struct {
@@ -28,7 +34,7 @@ func getName(id int64) (string, error) {
 			}
 		} `json:"character_list"`
 	}
-	err := client.Get(&data,
+	err = client.Get(&data,
 		"character",
 		census.SearchOption("character_id", strconv.FormatInt(id, 10)),
 		census.ResolveOption("outfit"),

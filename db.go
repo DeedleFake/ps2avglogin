@@ -271,12 +271,12 @@ func (db *sqliteDB) SaveSession(s Session) error {
 	return walkStruct(&s, func(name string, field reflect.Value) (err error) {
 		switch field.Kind() {
 		case reflect.String:
-			_, err = db.sadd.Exec(name, field.String(), nil, nil)
+			_, err = db.sadd.Exec(name, field.String(), 0, time.Time{})
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			_, err = db.sadd.Exec(name, nil, field.Int(), nil)
+			_, err = db.sadd.Exec(name, "", field.Int(), time.Time{})
 		default:
 			if field.Type().ConvertibleTo(timeType) {
-				_, err = db.sadd.Exec(name, nil, nil, field.Convert(timeType).Interface())
+				_, err = db.sadd.Exec(name, "", 0, field.Convert(timeType).Interface())
 			}
 		}
 		if err != nil {

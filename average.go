@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"math"
 	"time"
 )
 
@@ -14,10 +13,6 @@ type RollingAverage struct {
 	// from JSON properly.
 	Cur jsonDuration `json:"cur"`
 
-	// StdDev is the standard deviation of the dataset that produced the
-	// rolling average.
-	StdDev jsonDuration `json:"stddev"`
-
 	// Num is the number of data points that the current average was
 	// calculated from.
 	Num int64 `json:"num"`
@@ -26,7 +21,6 @@ type RollingAverage struct {
 // Update adds a new data point to the average.
 func (r *RollingAverage) Update(new time.Duration) time.Duration {
 	r.Cur = jsonDuration(((int64(r.Cur) * r.Num) + int64(new)) / (r.Num + 1))
-	r.StdDev = jsonDuration(math.Sqrt(((float64(r.StdDev*r.StdDev) * float64(r.Num)) + float64(new)) / float64(r.Num+1)))
 	r.Num++
 
 	return time.Duration(r.Cur)
