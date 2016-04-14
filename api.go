@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"github.com/DeedleFake/census"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,14 +12,12 @@ var (
 	client = &census.Client{
 		Game: "ps2",
 		HTTPClient: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: 15 * time.Second,
 		},
 	}
 )
 
-func getName(out chan<- string, id int64, done chan<- struct{}) {
-	defer close(done)
-
+func getName(id int64) (string, error) {
 	var data struct {
 		Chars []struct {
 			Name struct {
@@ -37,12 +34,10 @@ func getName(out chan<- string, id int64, done chan<- struct{}) {
 		census.ResolveOption("outfit"),
 	)
 	if err != nil {
-		log.Printf("Failed to get character name for %v: %v", id, err)
-		out <- "Error: Could not get name."
-		return
+		return "", err
 	}
 	if len(data.Chars) == 0 {
-		out <- "Error: Could not get name."
+		return "", noSuchCharError(id)
 	}
 
 	buf := bytes.NewBuffer(make([]byte, 0, len(data.Chars[0].Name.First)+len(data.Chars[0].Outfit.Alias)+3))
@@ -53,5 +48,11 @@ func getName(out chan<- string, id int64, done chan<- struct{}) {
 	}
 	buf.WriteString(data.Chars[0].Name.First)
 
-	out <- buf.String()
+	return buf.String(), nil
+}
+
+type noSuchCharError int64
+
+func (err noSuchCharError) Error() string {
+	return "No such char: " + strconv.FormatInt(int64(err), 10)
 }
