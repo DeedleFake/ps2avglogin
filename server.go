@@ -59,7 +59,7 @@ func init() {
 	</head>
 	<body>
 		<div id='error'></div>
-		<div style='max-width:640px;margin-left:auto;margin-right:auto;'>
+		<div style='max-width:800px;margin-left:auto;margin-right:auto;'>
 			<div id='loading'>
 				<h2>Loading...</h2>
 			</div>
