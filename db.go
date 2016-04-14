@@ -150,7 +150,7 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
-	oldest, err := db.Prepare(`SELECT id, min(login) FROM chars`)
+	oldest, err := db.Prepare(`SELECT id, login FROM chars ORDER BY login LIMIT 1`)
 	if err != nil {
 		return nil, err
 	}
