@@ -110,8 +110,9 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 					if err != nil {
 						log.Printf("Failed to get oldest char: %v", err)
 					}
-					oldest = id
 
+					log.Printf("Previous oldest session was %q (%v) and lasted %v", s.OldestName, oldest, s.Oldest.String())
+					oldest = id
 					s.Oldest = timeDiff(t)
 					s.OldestName, err = getName(id)
 					if err != nil {

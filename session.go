@@ -97,16 +97,20 @@ func (t timeDiff) Since() time.Duration {
 	return time.Since(time.Time(t))
 }
 
-func (t timeDiff) MarshalJSON() ([]byte, error) {
+func (t timeDiff) String() string {
 	if time.Time(t).IsZero() {
-		return []byte(`"None"`), nil
+		return "None"
 	}
 
-	str := (t.Since() / time.Minute * time.Minute).String()
+	return (t.Since() / time.Minute * time.Minute).String()
+}
+
+func (t timeDiff) MarshalJSON() ([]byte, error) {
+	str := t.String()
 
 	buf := bytes.NewBuffer(make([]byte, 0, len(str)+2))
 	buf.WriteByte('"')
-	buf.WriteString(str)
+	buf.WriteString(t.String())
 	buf.WriteByte('"')
 
 	return buf.Bytes(), nil
