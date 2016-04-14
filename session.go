@@ -27,6 +27,9 @@ type Session struct {
 	ShortestLong jsonDuration `json:"shortestlong"`
 	Shortest     jsonDuration `json:"shortest"`
 
+	Oldest     timeDiff `json:"oldest"`
+	OldestName string   `json:"oldestname"`
+
 	// TODO: Add another average that doesn't include repeat characters?
 
 	// Runtime is a timestamp of the time that the tracker was started.
@@ -84,7 +87,8 @@ func autosave(cancel chan struct{}) {
 // timeDiff is a light wrapper around time.Time that marshals to JSON
 // as a duration since the time that the diff represents. For example,
 // if time.Now() is 3 seconds after the time represented by the
-// timeDiff, the JSON representation will be "3s".
+// timeDiff, the JSON representation will be "3s". It rounds to the
+// nearest minute.
 type timeDiff time.Time
 
 // Since returns the duration representing the difference between the
@@ -94,6 +98,10 @@ func (t timeDiff) Since() time.Duration {
 }
 
 func (t timeDiff) MarshalJSON() ([]byte, error) {
+	if time.Time(t).IsZero() {
+		return []byte(`"None"`), nil
+	}
+
 	str := (t.Since() / time.Minute * time.Minute).String()
 
 	buf := bytes.NewBuffer(make([]byte, 0, len(str)+2))

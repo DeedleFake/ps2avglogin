@@ -45,14 +45,30 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 		return s
 	}
 
+	var oldest int64
+
 	for {
 		select {
 		case ev := <-logins:
-			err := db.SetChar(ev.CharacterID, time.Unix(ev.Timestamp, 0))
+			t := time.Unix(ev.Timestamp, 0)
+
+			err := db.SetChar(ev.CharacterID, t)
 			if err != nil {
 				// Not a fatal error.
 				log.Printf("Failed to add %v to DB: %v", ev.CharacterID, err)
 			}
+
+			if oldest == 0 {
+				oldest = ev.CharacterID
+
+				s.Oldest = timeDiff(t)
+				s.OldestName, err = getName(ev.CharacterID)
+				if err != nil {
+					log.Printf("Failed to get name for %v: %v", ev.CharacterID, err)
+				}
+				log.Printf("New oldest session is %q (%v) since %v", s.OldestName, ev.CharacterID, s.Oldest)
+			}
+
 		case ev := <-logouts:
 			in, ok, err := db.GetChar(ev.CharacterID)
 			if err != nil {
@@ -79,7 +95,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 						log.Printf("Failed to get name for %v: %v", ev.CharacterID, err)
 						s.LongestName = ""
 					}
-					log.Printf("New longest session record is held by %q (%v)", s.LongestName, ev.CharacterID)
+					log.Printf("New longest session record is held by %q (%v) at %v", s.LongestName, ev.CharacterID, s.Longest)
 				}
 				if d < time.Duration(s.Shortest) {
 					s.Shortest = jsonDuration(d)
@@ -88,6 +104,21 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 				err := db.RemoveChar(ev.CharacterID)
 				if err != nil {
 					log.Printf("Failed to remove %v from DB: %v", ev.CharacterID, err)
+				}
+
+				if ev.CharacterID == oldest {
+					id, t, err := db.OldestChar()
+					if err != nil {
+						log.Printf("Failed to get oldest char: %v", err)
+					}
+					oldest = id
+
+					s.Oldest = timeDiff(t)
+					s.OldestName, err = getName(id)
+					if err != nil {
+						log.Printf("Failed to get name for %v: %v", id, err)
+					}
+					log.Printf("New oldest session is %q (%v) since %v", s.OldestName, id, s.Oldest)
 				}
 			}
 

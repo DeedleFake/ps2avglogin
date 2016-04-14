@@ -85,6 +85,7 @@ func init() {
 
 				<div>
 					<h2>Longest session: <span id='longest'></span> <span id='longestname'></span></h2>
+					<h2>Longest active session: <span id='oldest'></span> <span id='oldestname'></span></h2>
 					<h2>Shortest long session: <span id='shortestlong'></span></h2>
 					<h2>Shortest session: <span id='shortest'></span></h2>
 				</div>
@@ -154,6 +155,9 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 	var shortestlong = $('#shortestlong');
 	var shortest = $('#shortest');
 
+	var oldest = $('#oldest');
+	var oldestname = $('#oldestname');
+
 	var online = $('#online');
 	var runtime = $('#runtime');
 
@@ -175,6 +179,9 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 		longestname.html('(' + data.longestname + ')');
 		shortestlong.html(data.shortestlong);
 		shortest.html(data.shortest);
+
+		oldest.html(data.oldest);
+		oldestname.html(data.oldestname);
 
 		online.html(data.numchars);
 		runtime.html(data.runtime);
