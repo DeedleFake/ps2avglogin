@@ -61,6 +61,7 @@ func (db mapDB) GetChar(id int64) (time.Time, bool, error) {
 }
 
 func (db mapDB) OldestChar() (int64, time.Time, error) {
+	// TODO: Implement.
 	panic("Not implemented.")
 }
 
@@ -134,7 +135,7 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS session (id TEXT PRIMARY KEY, valstr TEXT, valint INTEGER, valtime TIMESTAMP)`)
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS session (id TEXT PRIMARY KEY, valstr TEXT, valint INTEGER)`)
 	if err != nil {
 		return nil, err
 	}
@@ -159,12 +160,12 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
-	sadd, err := db.Prepare(`INSERT OR REPLACE INTO session (id, valstr, valint, valtime) VALUES (?, ?, ?, ?)`)
+	sadd, err := db.Prepare(`INSERT OR REPLACE INTO session (id, valstr, valint) VALUES (?, ?, ?)`)
 	if err != nil {
 		return nil, err
 	}
 
-	sget, err := db.Prepare(`SELECT valstr, valint, valtime FROM session WHERE id=?`)
+	sget, err := db.Prepare(`SELECT valstr, valint FROM session WHERE id=?`)
 	if err != nil {
 		return nil, err
 	}
@@ -231,13 +232,10 @@ func (db *sqliteDB) NumChar() int {
 }
 
 func (db *sqliteDB) LoadSession() (s Session, err error) {
-	timeType := reflect.TypeOf(time.Time{})
-
 	err = walkStruct(&s, func(name string, field reflect.Value) error {
 		var valstr string
 		var valint int64
-		var valtime time.Time
-		err := db.sget.QueryRow(name).Scan(&valstr, &valint, &valtime)
+		err := db.sget.QueryRow(name).Scan(&valstr, &valint)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				// Just ignore fields that aren't in the database.
@@ -252,10 +250,6 @@ func (db *sqliteDB) LoadSession() (s Session, err error) {
 			field.SetString(valstr)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			field.SetInt(valint)
-		default:
-			if t := field.Type(); timeType.ConvertibleTo(t) {
-				field.Set(reflect.ValueOf(valtime).Convert(t))
-			}
 		}
 
 		return nil
@@ -266,18 +260,12 @@ func (db *sqliteDB) LoadSession() (s Session, err error) {
 }
 
 func (db *sqliteDB) SaveSession(s Session) error {
-	timeType := reflect.TypeOf(time.Time{})
-
 	return walkStruct(&s, func(name string, field reflect.Value) (err error) {
 		switch field.Kind() {
 		case reflect.String:
-			_, err = db.sadd.Exec(name, field.String(), 0, time.Time{})
+			_, err = db.sadd.Exec(name, field.String(), 0)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			_, err = db.sadd.Exec(name, "", field.Int(), time.Time{})
-		default:
-			if field.Type().ConvertibleTo(timeType) {
-				_, err = db.sadd.Exec(name, "", 0, field.Convert(timeType).Interface())
-			}
+			_, err = db.sadd.Exec(name, "", field.Int())
 		}
 		if err != nil {
 			log.Fatalf("Failed to save %q (%v): %v", name, field.Interface(), err)

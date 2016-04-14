@@ -27,21 +27,21 @@ type Session struct {
 	ShortestLong jsonDuration `json:"shortestlong"`
 	Shortest     jsonDuration `json:"shortest"`
 
-	Oldest     timeDiff `json:"oldest"`
-	OldestName string   `json:"oldestname"`
+	Oldest     timeDiff `json:"oldest" walk:"-"`
+	OldestName string   `json:"oldestname" walk:"-"`
 
 	// TODO: Add another average that doesn't include repeat characters?
 
 	// Runtime is a timestamp of the time that the tracker was started.
 	// timeDiff is a wrapper around time.Time.
-	Runtime timeDiff `json:"runtime"`
+	Runtime timeDiff `json:"runtime" walk:"-"`
 
 	// NumChars is the number of online characters that are currently
 	// being tracked.
 	NumChars int `json:"numchars"`
 
 	// Err is holds any errors encountered by the monitor.
-	Err error `json:"err,omitempty"`
+	Err error `json:"err,omitempty" walk:"-"`
 
 	// db stores the current database so that a session knows how to
 	// save itself.
