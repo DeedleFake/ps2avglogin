@@ -94,7 +94,7 @@ type timeDiff time.Time
 // Since returns the duration representing the difference between the
 // current time and t.
 func (t timeDiff) Since() time.Duration {
-	return time.Now().Sub(time.Time(t))
+	return time.Since(time.Time(t))
 }
 
 func (t timeDiff) MarshalJSON() ([]byte, error) {

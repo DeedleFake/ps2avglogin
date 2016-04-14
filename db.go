@@ -113,7 +113,7 @@ type sqliteDB struct {
 	get    *sql.Stmt
 	oldest *sql.Stmt
 	rem    *sql.Stmt
-	num    int
+	num    *sql.Stmt
 
 	sadd *sql.Stmt
 	sget *sql.Stmt
@@ -160,6 +160,11 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
+	num, err := db.Prepare(`SELECT count(id) FROM chars`)
+	if err != nil {
+		return nil, err
+	}
+
 	sadd, err := db.Prepare(`INSERT OR REPLACE INTO session (id, valstr, valint) VALUES (?, ?, ?)`)
 	if err != nil {
 		return nil, err
@@ -177,6 +182,7 @@ func newsqliteDB(path string) (DB, error) {
 		get:    get,
 		oldest: oldest,
 		rem:    rem,
+		num:    num,
 
 		sadd: sadd,
 		sget: sget,
@@ -185,13 +191,7 @@ func newsqliteDB(path string) (DB, error) {
 
 func (db *sqliteDB) SetChar(id int64, login time.Time) error {
 	_, err := db.add.Exec(id, login)
-	if err != nil {
-		return err
-	}
-
-	db.num++
-
-	return nil
+	return err
 }
 
 func (db *sqliteDB) GetChar(id int64) (time.Time, bool, error) {
@@ -214,21 +214,17 @@ func (db *sqliteDB) OldestChar() (id int64, t time.Time, err error) {
 }
 
 func (db *sqliteDB) RemoveChar(id int64) error {
-	res, err := db.rem.Exec(id)
-	if err != nil {
-		return err
-	}
-
-	if a, _ := res.RowsAffected(); a > 0 {
-		// Should never be more than one, but who knows.
-		db.num -= int(a)
-	}
-
-	return nil
+	_, err := db.rem.Exec(id)
+	return err
 }
 
-func (db *sqliteDB) NumChar() int {
-	return db.num
+func (db *sqliteDB) NumChar() (n int) {
+	err := db.num.QueryRow().Scan(&n)
+	if err != nil {
+		log.Printf("Failed to get number of active characters: %v", err)
+	}
+
+	return n
 }
 
 func (db *sqliteDB) LoadSession() (s Session, err error) {

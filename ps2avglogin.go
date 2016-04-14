@@ -94,7 +94,7 @@ func coord(logins <-chan *events.PlayerLogin, logouts <-chan *events.PlayerLogou
 					if err != nil {
 						log.Printf("Failed to get name for %v: %v", ev.CharacterID, err)
 					}
-					log.Printf("New longest session record is held by %q (%v) at %v", s.LongestName, ev.CharacterID, s.Longest)
+					log.Printf("New longest session record is held by %q (%v) at %v", s.LongestName, ev.CharacterID, time.Duration(s.Longest))
 				}
 				if d < time.Duration(s.Shortest) {
 					s.Shortest = jsonDuration(d)
