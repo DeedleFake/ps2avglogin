@@ -150,7 +150,7 @@ func newsqliteDB(path string) (DB, error) {
 		return nil, err
 	}
 
-	oldest, err := db.Prepare(`SELECT id, login FROM chars ORDER BY login LIMIT 1`)
+	oldest, err := db.Prepare(`SELECT id, login, min(login) FROM chars`)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +209,8 @@ func (db *sqliteDB) GetChar(id int64) (time.Time, bool, error) {
 }
 
 func (db *sqliteDB) OldestChar() (id int64, t time.Time, err error) {
-	err = db.oldest.QueryRow().Scan(&id, &t)
+	var min string
+	err = db.oldest.QueryRow().Scan(&id, &t, &min)
 	return
 }
 
