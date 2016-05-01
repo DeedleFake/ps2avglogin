@@ -12,6 +12,25 @@ To install, first you will need a working [Go toolchain][go] that is at least ve
 
 to install ps2avglogin.
 
+Docker
+------
+
+To build a Docker image containing ps2avglogin, first, build a binary by running the following command in the source directory:
+
+> go build -ldflags '-extldflags "-static"'
+
+The binary will also need access to the SSL root certificates, so copy those to the repository. They are usually located at `/etc/ssl/certs/ca-certificates.crt`, so run
+
+> cp /etc/ssl/certs/ca-certificates.crt .
+
+Then run
+
+> docker build -t ps2avglogin .
+
+to build the image, and you're done.
+
+A quick note: The default working directory for the image is in `/data`, so it may be a good idea to mount `/data` to somewhere on the host system for access to the database and for preserving data when updating.
+
 Usage
 -----
 

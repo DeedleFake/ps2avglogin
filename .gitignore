@@ -1,2 +1,6 @@
+ps2avglogin
+
 *.json
 *.db
+
+ca-certificates.crt
