@@ -28,7 +28,7 @@ func init() {
 		<title>{{.Title}} :: Main</title>
 
 		<script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js' defer></script>
-		<script type='application/javascript' src='/ps2avglogin.js' defer></script>
+		<script type='application/javascript' src='ps2avglogin.js' defer></script>
 
 		<style type='text/css'>
 			body
