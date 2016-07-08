@@ -4,3 +4,4 @@ ps2avglogin
 *.db
 
 ca-certificates.crt
+docker-compose.yml

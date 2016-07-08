@@ -26,7 +26,6 @@ func init() {
 	template.Must(serverTmpl.New("main").Parse(`<html>
 	<head>
 		<title>{{.Title}} :: Main</title>
-
 		<script type='application/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js' defer></script>
 		<script type='application/javascript' src='ps2avglogin.js' defer></script>
 
@@ -193,7 +192,7 @@ func serveJS(rw http.ResponseWriter, req *http.Request) {
 
 	function getSession()
 	{
-		$.getJSON('/session').done(setFields).fail(function() {
+		$.getJSON('session').done(setFields).fail(function() {
 			error.html('Error connecting to ps2avglogin server.');
 			error.slideDown('fast');
 		}).always(function() {
